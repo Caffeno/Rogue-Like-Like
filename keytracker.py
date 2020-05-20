@@ -122,4 +122,5 @@ if __name__ == "__main__":
         key = kb.check_input()
         if key:
             print("a print of {}".format(key))
+            print(len(key))
             print(ord(key))

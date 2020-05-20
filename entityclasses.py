@@ -10,11 +10,20 @@ class Entity:
         self.x = location[1]
         self.y = location[2]
         self.name = name
+     
+    def getname(self):
+        return self.name
+
     def set_blocking(self, val):
         self.blocking = val
 
     def getlocation(self):
         return [self.M, self.x, self.y]
+
+    def setlocation(self, newloc):
+        self.M = newloc[0]
+        self.x = newloc[1]
+        self.y = newloc[2]
 
     def getage(self):
         now = time.time()
@@ -31,7 +40,8 @@ class Entity:
 
 class Mob(Entity):
     def __init__(self, HP, speed, location, name):
-        self.health = HP
+        self.HP = HP
+        self.HPmax = HP
         self.speed = speed
         super().set_blocking(True)
         super().__init__(location, name)
@@ -41,7 +51,11 @@ class Mob(Entity):
         self.HP += value
 
     def getHP(self):
-        return HP
+        return (self.HP, self.HPmax)
+
+    def setHP(self, newHP, newHPmax):
+        self.HP = newHP
+        self.HPmax = newHPmax
 
     def move(self, vector, now):
         if self.speed != 0 and 1 / (self.speed) <=  (now - self.laststep):
@@ -49,7 +63,7 @@ class Mob(Entity):
             self.y += vector[1]
             self.laststep = now
 
-    def chscreen(self, mapsize, newmap):
+    def chscreenrel(self, mapsize, newmap):
         self.x = self.x % mapsize[0]
         self.y = self.y % mapsize[1]
         self.M = newmap
@@ -63,6 +77,22 @@ class Player(Mob):
         self.equipment = {}
         self.equipment['weapon'] = 'Dagger'
         self.action = ""
+        self.destination = ""
+        self.events = []
+
+    def getevents(self):
+        e = self.events
+        self.events = []
+        return e
+
+    def addevent(self, event):
+        self.events.append(event)
+
+    def setdestination(self, dest):
+        self.destination = dest
+ 
+    def getdestination(self):
+        return self.destination
 
     def pickup(self, loot):
          self.inventory['money'] += loot
@@ -70,7 +100,19 @@ class Player(Mob):
     def setaction(self, action):
         if action == 'up' or action == 'down' or action == 'left' or action == 'right':
             self.action = action
-        
+
+    def clearaction(self):
+        self.action = ""
+
+    def changeequip(self, value, piece):
+        self.equipment[piece] = value
+
+    def setequip(self, equip):
+        self.equipment = equip
+
+    def getequip(self):
+        return self.equipment
+
     def getaction(self):
         return self.action
     
