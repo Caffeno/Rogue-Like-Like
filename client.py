@@ -33,6 +33,8 @@ class Client:
         self.sel.register(sock, events, data=data)
     
     def srvc_con(self, key, mask):
+        #This is more like what the server should be like
+        #Could still be seperated into send and receive methods
         sock = key.fileobj
         data = key.data
         if mask & selectors.EVENT_READ:
@@ -40,13 +42,17 @@ class Client:
             if data.recv == b"end":
                 sel.unregister(sock)
                 sock.close()
+                return
         if mask & selectors.EVENT_WRITE:
             if data.send:
                 sent = sock.send(data.send)
                 data.send = data.send[sent:]
+                #move this so there can be a check from the server if the client is connected
                 if not data.connected:
                     data.connected = True
 
+    #I'm going to make the response from the server always be in the form of a compressed json dict
+    #I will check to see if a corrisponding dict key is is there and process that data accordingly
     def parseResponse(self, serverresponse, world, key):
         jsondata = zlib.decompress(serverresponse)
         data = json.loads(jsondata)
@@ -65,6 +71,7 @@ class Client:
         if len(self.eventlog) > 6:
             self.eventlog = self.eventlog[:6]
         
+    #Make this "updatedisplay()" handle showing client text input, and client action prompt
     def printmap(self, region, MP):
         for x in range(21):
             sys.stdout.write("\033[F") #back to previous line
@@ -95,19 +102,21 @@ class Client:
             elif charlen == 1 and ord(char) == 10 and text:
                 key.data.send = text.encode('utf-8')
                 W.addplayer(text)
+                #why is this in more than one spot? remove so check can be seperate
                 key.data.connected = True
                 key.data.textneeded = False
                 key.data.player_id = text
                 text = ""
         return text
 
+    #good
     def prepevents(self):
         events = []
         events.append('')
         events.append('')
         events.append('  Events:')
         for e in self.eventlog:
-            events.append('    ' + e)
+            events.append('    -' + e)
         return events
 
 

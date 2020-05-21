@@ -31,6 +31,8 @@ class World:
             self.maps[M] = MP
 
     def addplayer(self, player_id):
+        #TODO: prevent duplicate player name while not breaking the client
+        #The Client should be told they are succsesfuly connected by the server (rather than just assuming that they become connected once they send a name)
         M = 'North-West_Shore'
         self.players[player_id] = Player(5, 4, [M, 1, 1], player_id)
         with self.maps[M] as MP:
@@ -45,7 +47,7 @@ class World:
         if self.players: #if not so its less indented
             for M in self.activemaps:
                 #map specific action function(M)
-                grid = self.populatemap(M) #add a map key to return {'2': ('p', player_id) '3': ('m', monster_id)} OR {(4, 7): ('p', player_id) }
+                grid = self.populatemap(M) #add a map key to return {(4, 7): ('p', player_id) }
                 with self.maps[M] as MP:
                     mapplayers = MP.getplayers()
                     size = MP.getsize()
@@ -130,6 +132,12 @@ class World:
                 populatedmap.append(line)
             return populatedmap
                                 
+    #Needs Overhaul, populate map can return dict of position:entity so its easier to tell where things are
+    #Other players will be Letters monsters will be numbers
+    #the player will be @
+    #A player should not have its character change durring a session (it will be the first letter of their name(I should prevent numbers then)
+    #Will return the map and a legend
+    #adding blanks to make it nice on the display will be handled by the client
     def getmaptodraw(self, player_id):
         if player_id not in self.players.keys():
             return ''

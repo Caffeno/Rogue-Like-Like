@@ -30,6 +30,7 @@ def acc_wrapper(sock):
     sel.register(userconnection, events, data=data)
 
 def srvc_connection(key, mask):
+    #Seperate into a send and receive Methods
     sock = key.fileobj
     data = key.data
     if not data.player_id:
@@ -41,7 +42,7 @@ def srvc_connection(key, mask):
                 sock.close()
                 return
             if receive_data != b'\xff\xf4\xff\xfd\x06' or receive_data != b'exit\n\r':
-                data.player_id = receive_data.replace(b"\n", b"").replace(b"\r", b"").decode('ascii')
+                data.player_id = receive_data.replace(b"\n", b"").replace(b"\r", b"").decode('utf-8')
             else:
                 sel.unregister(sock)
                 sock.close()
@@ -61,6 +62,7 @@ def srvc_connection(key, mask):
             else:
                 sel.unregister(sock)
                 sock.close()
+                return
                 
     if mask & selectors.EVENT_WRITE:
         if data.binout:
@@ -84,6 +86,7 @@ while True:
         if key.data is None:
             acc_wrapper(key.fileobj)
         else:
+            #Clean this loop up so its easier to follow and make changes to
             if not key.data.namerequested:
                 data = 'What is your name?'
                 jsondata = json.dumps(data)
